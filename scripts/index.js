@@ -13,6 +13,15 @@ function addCard(item, delCard) {
   let htmlItem = template.querySelector('.places__item').cloneNode(true);
   htmlItem.querySelector('.card__title').textContent=item.name;
   htmlItem.querySelector('.card__image').src=item.link;
+
+  const delButton = htmlItem.querySelector('.card__delete-button');
+  
+  function removeCard(){
+    htmlItem.remove();
+  }
+
+  delButton.addEventListener('click', removeCard);
+
   return htmlItem;
 }
 
