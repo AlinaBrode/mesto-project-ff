@@ -25,5 +25,4 @@ function addCard(item, delCard) {
   return htmlItem;
 }
 
-
 document.querySelector('.places__list').append(...initialCards.map(addCard));
