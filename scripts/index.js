@@ -8,21 +8,23 @@
 
 // @todo: Вывести карточки на страницу
 
-function addCard(item, delCard) {
+function delCard(event) {
+  event.target.closest('.places__item').remove();
+}
+
+function addCard(item, funcDelCard) {
   const template = document.querySelector('#card-template').content;
-  let htmlItem = template.querySelector('.places__item').cloneNode(true);
+  const htmlItem = template.querySelector('.places__item').cloneNode(true);
   htmlItem.querySelector('.card__title').textContent=item.name;
-  htmlItem.querySelector('.card__image').src=item.link;
 
-  const delButton = htmlItem.querySelector('.card__delete-button');
-  
-  function removeCard(){
-    htmlItem.remove();
-  }
+  const cardImage = htmlItem.querySelector('.card__image');
+  cardImage.src = item.link;
+  cardImage.alt = item.name;
 
-  delButton.addEventListener('click', removeCard);
+  htmlItem.querySelector('.card__delete-button').addEventListener('click', funcDelCard);
 
   return htmlItem;
 }
 
-document.querySelector('.places__list').append(...initialCards.map(addCard));
+document.querySelector('.places__list').append(...initialCards.map(descr => addCard(descr, delCard)));
+
