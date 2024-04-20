@@ -40,11 +40,41 @@ const popupTypeEdit = document.querySelector(".popup_type_edit");
 const popupTypeNewCard = document.querySelector(".popup_type_new-card");
 const popupTypeImage = document.querySelector(".popup_type_image");
 const profileTitle = document.querySelector(".profile__title");
-const profileDescription = document.querySelector('.profile__description');
+const profileDescription = document.querySelector(".profile__description");
+const formEditProfile = document.forms["edit-profile"];
+const formAddCard = document.forms["new-place"];
+
+function handleFormSubmit(evt) {
+  evt.preventDefault();
+  profileTitle.textContent = document.forms["edit-profile"].name.value;
+  profileDescription.textContent =
+    document.forms["edit-profile"].description.value;
+  dialogEditCard.classList.remove("popup_is-opened");
+}
+
+function handleAddCard(evt) {
+  evt.preventDefault();
+  const cardTitle = document.forms["new-place"]["place-name"].value;
+  const cardLink = document.forms["new-place"].link.value;
+  const newCard = addCard(
+    {
+      name: cardTitle,
+      link: cardLink,
+    },
+    delCard
+  );
+  document
+  .querySelector(".places__list").prepend(newCard);
+  dialogNewCard.classList.remove("popup_is-opened");
+}
+
+formEditProfile.addEventListener("submit", handleFormSubmit);
+formAddCard.addEventListener("submit", handleAddCard);
 
 function openDialogEditProfile(evt) {
-  document.forms['edit-profile'].name.value = profileTitle.textContent;
-  document.forms['edit-profile'].description.value = profileDescription.textContent;
+  document.forms["edit-profile"].name.value = profileTitle.textContent;
+  document.forms["edit-profile"].description.value =
+    profileDescription.textContent;
 
   if (
     evt.target.classList.contains("profile__add-button") ||
