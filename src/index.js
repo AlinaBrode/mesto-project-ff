@@ -1,11 +1,3 @@
-console.log("Hello, World!");
-const numbers = [2, 3, 5];
-
-// Стрелочная функция. Не запнётся ли на ней Internet Explorer?
-const doubledNumbers = numbers.map((number) => number * 2);
-
-console.log(doubledNumbers); // 4, 6, 10
-
 import jordanImage from "./images/card_1.jpg";
 import jamesImage from "./images/card_2.jpg";
 import bryantImage from "./images/card_3.jpg";
@@ -16,20 +8,6 @@ import { initialCards } from "./cards.js";
 import { addCard } from "./card.js";
 import { openModal, closeModal } from "./modal.js";
 
-const whoIsTheGoat = [
-  // меняем исходные пути на переменные
-  { name: "Michael Jordan", link: jordanImage },
-  { name: "Lebron James", link: jamesImage },
-  { name: "Kobe Bryant", link: bryantImage },
-];
-
-function delCard(event) {
-  event.target.closest(".places__item").remove();
-}
-
-document
-  .querySelector(".places__list")
-  .append(...initialCards.map((descr) => addCard(descr, delCard)));
 
 const addButton = document.querySelector(".profile__add-button");
 const editButton = document.querySelector(".profile__edit-button");
@@ -43,6 +21,31 @@ const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
 const formEditProfile = document.forms["edit-profile"];
 const formAddCard = document.forms["new-place"];
+const popupImage = document.querySelector('.popup__image');
+
+
+function delCard(event) {
+  event.target.closest(".places__item").remove();
+}
+
+function likeCard(event) {
+  event.target.classList.toggle("card__like-button_is-active");
+}
+
+function viewImage(event) {
+  event.stopPropagation();
+  console.log(event);
+  popupTypeImage.classList.add('popup_is-opened');
+  popupImage.src = event.target.src;
+  popupImage.alt = event.target.alt;
+  
+  // TODO: pass some information from event.target into popupTypeImage
+}
+
+document
+  .querySelector(".places__list")
+  .append(...initialCards.map((descr) => addCard(descr, delCard,likeCard,viewImage)));
+
 
 function handleFormSubmit(evt) {
   evt.preventDefault();
@@ -63,7 +66,9 @@ function handleAddCard(evt) {
       name: cardTitle,
       link: cardLink,
     },
-    delCard
+    delCard,
+    likeCard,
+    viewImage
   );
   document
   .querySelector(".places__list").prepend(newCard);
