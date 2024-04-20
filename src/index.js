@@ -56,6 +56,8 @@ function handleAddCard(evt) {
   evt.preventDefault();
   const cardTitle = document.forms["new-place"]["place-name"].value;
   const cardLink = document.forms["new-place"].link.value;
+  document.forms["new-place"]["place-name"].value = '';
+  document.forms["new-place"].link.value = '';
   const newCard = addCard(
     {
       name: cardTitle,
