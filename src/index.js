@@ -1,18 +1,11 @@
-import jordanImage from "./images/card_1.jpg";
-import jamesImage from "./images/card_2.jpg";
-import bryantImage from "./images/card_3.jpg";
-import logoImage from "./images/logo.svg";
 import "./pages/index.css";
 
 import { initialCards } from "./cards.js";
-import { addCard } from "./card.js";
-import { openModal, closeModal } from "./modal.js";
+import { addCard, likeCard, delCard } from "./card.js";
+import { openPopup, closePopup } from "./modal.js";
 
-
-const addButton = document.querySelector(".profile__add-button");
-const editButton = document.querySelector(".profile__edit-button");
-const dialogNewCard = document.querySelector(".popup_type_new-card");
-const dialogEditCard = document.querySelector(".popup_type_edit");
+const profileAddButton = document.querySelector(".profile__add-button");
+const profileEditButton = document.querySelector(".profile__edit-button");
 const pageContent = document.querySelector(".page__content");
 const popupTypeEdit = document.querySelector(".popup_type_edit");
 const popupTypeNewCard = document.querySelector(".popup_type_new-card");
@@ -21,46 +14,42 @@ const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
 const formEditProfile = document.forms["edit-profile"];
 const formAddCard = document.forms["new-place"];
-const popupImage = document.querySelector('.popup__image');
-
-
-function delCard(event) {
-  event.target.closest(".places__item").remove();
-}
-
-function likeCard(event) {
-  event.target.classList.toggle("card__like-button_is-active");
-}
+const popupImage = document.querySelector(".popup__image");
+const allPopups = document.querySelectorAll(".popup");
+const popupCaption = document.querySelector(".popup__caption");
+const placesList = document.querySelector(".places__list");
 
 function viewImage(event) {
   event.stopPropagation();
-  console.log(event);
-  popupTypeImage.classList.add('popup_is-opened');
+  openPopup(popupTypeImage);
+  document.addEventListener("click", onOverlayClose);
+  document.addEventListener("keydown", onClosePopupEsc);
+
   popupImage.src = event.target.src;
   popupImage.alt = event.target.alt;
-  
-  // TODO: pass some information from event.target into popupTypeImage
+  popupCaption.textContent = event.target.alt;
 }
 
-document
-  .querySelector(".places__list")
-  .append(...initialCards.map((descr) => addCard(descr, delCard,likeCard,viewImage)));
-
+placesList.append(
+  ...initialCards.map((descr) => addCard(descr, delCard, likeCard, viewImage))
+);
 
 function handleFormSubmit(evt) {
   evt.preventDefault();
-  profileTitle.textContent = document.forms["edit-profile"].name.value;
-  profileDescription.textContent =
-    document.forms["edit-profile"].description.value;
-  dialogEditCard.classList.remove("popup_is-opened");
+  profileTitle.textContent = formEditProfile.name.value;
+  profileDescription.textContent = formEditProfile.description.value;
+  closePopup(popupTypeEdit);
+  document.removeEventListener("click", onOverlayClose);
+  document.removeEventListener("keydown", onClosePopupEsc);
 }
 
 function handleAddCard(evt) {
-  evt.preventDefault();
-  const cardTitle = document.forms["new-place"]["place-name"].value;
-  const cardLink = document.forms["new-place"].link.value;
-  document.forms["new-place"]["place-name"].value = '';
-  document.forms["new-place"].link.value = '';
+  evt.preventDefault(); // prevents closing of popup by overlay-click logic
+
+  const cardTitle = formAddCard["place-name"].value;
+  const cardLink = formAddCard.link.value;
+  formAddCard["place-name"].value = "";
+  formAddCard.link.value = "";
   const newCard = addCard(
     {
       name: cardTitle,
@@ -70,75 +59,65 @@ function handleAddCard(evt) {
     likeCard,
     viewImage
   );
-  document
-  .querySelector(".places__list").prepend(newCard);
-  dialogNewCard.classList.remove("popup_is-opened");
+
+  placesList.prepend(newCard);
+  closePopup(popupTypeNewCard);
+  document.removeEventListener("click", onOverlayClose);
+  document.addEventListener("keydown", onClosePopupEsc);
 }
 
 formEditProfile.addEventListener("submit", handleFormSubmit);
 formAddCard.addEventListener("submit", handleAddCard);
 
 function openDialogEditProfile(evt) {
-  document.forms["edit-profile"].name.value = profileTitle.textContent;
-  document.forms["edit-profile"].description.value =
-    profileDescription.textContent;
+  formEditProfile.name.value = profileTitle.textContent;
+  formEditProfile.description.value = profileDescription.textContent;
 
-  if (
-    evt.target.classList.contains("profile__add-button") ||
-    evt.target.classList.contains("profile__edit-button")
-  ) {
-    evt.stopPropagation();
-    console.log("propagation is stopped");
-  }
-  dialogEditCard.classList.add("popup_is-opened");
+  evt.stopPropagation(); // prevents closing of popup by overlay-click logic
+
+  openPopup(popupTypeEdit);
+  document.addEventListener("click", onOverlayClose);
+  document.addEventListener("keydown", onClosePopupEsc);
 }
 
 function openDialogNewCard(evt) {
-  if (
-    evt.target.classList.contains("profile__add-button") ||
-    evt.target.classList.contains("profile__edit-button")
-  ) {
-    evt.stopPropagation();
-    console.log("propagation is stopped");
-  }
-  dialogNewCard.classList.add("popup_is-opened");
+  evt.stopPropagation(); // prevents closing of popup by overlay-click logic
+
+  openPopup(popupTypeNewCard);
+  document.addEventListener("click", onOverlayClose);
+  document.addEventListener("keydown", onClosePopupEsc);
 }
 
-addButton.addEventListener("click", openDialogNewCard);
-editButton.addEventListener("click", openDialogEditProfile);
+profileAddButton.addEventListener("click", openDialogNewCard);
+profileEditButton.addEventListener("click", openDialogEditProfile);
 
-function closePopup(evt) {
+function onClosePopup(evt) {
   if (evt.target.classList.contains("popup__close")) {
-    evt.target.parentNode.parentNode.classList.remove("popup_is-opened");
+    closePopup(evt.target.closest(".popup"));
+    document.removeEventListener("click", onOverlayClose);
+    document.addEventListener("keydown", onClosePopupEsc);
   }
 }
 
-function closePopupEsc(evt) {
+function onClosePopupEsc(evt) {
   if (evt.key === "Escape") {
-    popupTypeEdit.classList.remove("popup_is-opened");
-    popupTypeNewCard.classList.remove("popup_is-opened");
-    popupTypeImage.classList.remove("popup_is-opened");
+    closePopup(document.querySelector(".popup_is-opened"));
+    document.removeEventListener("click", onOverlayClose);
+    document.addEventListener("keydown", onClosePopupEsc);
   }
 }
 
-pageContent.addEventListener("click", closePopup);
-document.addEventListener("keydown", closePopupEsc);
+pageContent.addEventListener("click", onClosePopup);
 
-document.addEventListener("click", function (evt) {
-  let allPopups = document.querySelectorAll(".popup__content");
-  console.log("overlay click found");
-  for (let currentPopup of allPopups) {
-    console.log(
-      "current popup",
-      currentPopup,
-      currentPopup.contains(evt.target)
-    );
+function onOverlayClose(evt) {
+  for (const currentPopup of allPopups) {
     if (
-      currentPopup.parentNode.classList.contains("popup_is-opened") &&
-      !currentPopup.contains(evt.target)
+      currentPopup.classList.contains("popup_is-opened") &&
+      !currentPopup.querySelector(".popup__content").contains(evt.target)
     ) {
-      currentPopup.parentNode.classList.remove("popup_is-opened");
-      console.log("we removed it");
+      closePopup(currentPopup);
+      document.removeEventListener("click", onOverlayClose);
+      document.addEventListener("keydown", onClosePopupEsc);
     }
   }
-});
+}

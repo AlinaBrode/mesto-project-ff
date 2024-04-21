@@ -2,7 +2,14 @@
 
 export function closeModal(dialog) {
   return function (evt) {
-    console.log('parent node', evt.target.parentNode.parentNode);
     dialog.classList.remove('popup_is-opened');
   }
+}
+
+export function openPopup(popup) {
+  popup.classList.add("popup_is-opened");
+}
+
+export function closePopup(popup) {
+  popup.classList.remove("popup_is-opened");
 }

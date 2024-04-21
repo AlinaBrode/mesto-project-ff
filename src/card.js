@@ -19,3 +19,11 @@ export function addCard(item, funcDelCard, funcLikeCard, viewImage) {
 
   return htmlItem;
 }
+
+export function delCard(event) {
+  event.target.closest(".places__item").remove();
+}
+
+export function likeCard(event) {
+  event.target.classList.toggle("card__like-button_is-active");
+}
