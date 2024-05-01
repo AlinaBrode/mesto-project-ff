@@ -52,6 +52,7 @@
               placeholder="Имя"
               required
             />
+            <span class="popup__input popup__input_type_name-error"></span>
             <input
               type="text"
               name="description"
@@ -59,6 +60,9 @@
               placeholder="Занятие"
               required
             />
+            <span
+              class="popup__input popup__input_type_description-error"
+            ></span>
             <button type="submit" class="button popup__button">
               Сохранить
             </button>
@@ -75,8 +79,11 @@
               name="place-name"
               class="popup__input popup__input_type_card-name"
               placeholder="Название"
+              minlength="2"
+              maxlength="30"
               required
             />
+            <span class="popup__input popup__input_type_name-error"></span>
             <input
               type="url"
               name="link"
@@ -84,6 +91,7 @@
               placeholder="Ссылка на картинку"
               required
             />
+            <span class="popup__input popup__input_type_url-error"></span>
             <button type="submit" class="button popup__button">
               Сохранить
             </button>

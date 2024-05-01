@@ -1,3 +1,23 @@
 .popup__form {
   margin-top: 27px;
 }
+
+.popup__input_type_name-error {
+color:#FF0000;
+font-size: 12px;
+font-family: Inter;
+line-height: 14,52px;
+}
+
+.popup__input_type_description-error {
+  color:#FF0000;
+  font-size: 12px;
+  font-family: Inter;
+  line-height: 14,52px;
+  }
+  .popup__input_type_url-error {
+    color:#FF0000;
+    font-size: 12px;
+    font-family: Inter;
+    line-height: 14,52px;
+    }
