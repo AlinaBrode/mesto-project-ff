@@ -1,26 +1,35 @@
 import "./pages/index.css";
 
 import { initialCards } from "./cards.js";
-import { addCard, likeCard, delCard } from "./card.js";
+import { addCard, likeCard} from "./card.js";
 import {
   openPopup,
   closePopup,
   onClosePopupEsc,
   onOverlayClose,
 } from "./modal.js";
-
+const myToken = "90ad5c9a-5357-4276-be02-5ea1b5321bf2";
+const myCohort = "wff-cohort-12";
 const profileAddButton = document.querySelector(".profile__add-button");
 const profileEditButton = document.querySelector(".profile__edit-button");
 const popupTypeEdit = document.querySelector(".popup_type_edit");
 const popupTypeNewCard = document.querySelector(".popup_type_new-card");
 const popupTypeImage = document.querySelector(".popup_type_image");
+const popupTypeDelConfirm = document.querySelector(".popup_type_delete-confirm");
 const profileTitle = document.querySelector(".profile__title");
+const profileImage = document.querySelector(".profile__image");
 const profileDescription = document.querySelector(".profile__description");
 const formEditProfile = document.forms["edit-profile"];
 const formAddCard = document.forms["new-place"];
 const popupImage = document.querySelector(".popup__image");
 const popupCaption = document.querySelector(".popup__caption");
 const placesList = document.querySelector(".places__list");
+const popupConfirmDelete = document.querySelector('.popup_type_delete-confirm');
+const confirmDeleteForm = popupConfirmDelete.querySelector(".popup__form");
+const popupConfirmDeleteButton = confirmDeleteForm.querySelector('.popup__button');
+
+let profileInfo = null;
+let cardsList = null;
 
 const popupEditProfileFieldName = formEditProfile.querySelector(
   ".popup__input_type_name"
@@ -52,6 +61,36 @@ const popupNewCardFieldLinkError = formAddCard.querySelector(
   ".popup__input_type_url-error"
 );
 
+function delCard(event) {
+  /*event.target.closest(".places__item").remove();
+  console.log('cardId',event.target.cardId);*/
+  popupConfirmDeleteButton.cardId = event.target.cardId;
+  openPopup(popupTypeDelConfirm);
+}
+
+function onConfirmDelete(event) {
+  event.preventDefault();
+
+  fetch(`https://nomoreparties.co/v1/${myCohort}/cards/${popupConfirmDeleteButton.cardId}`, {
+    method: "DELETE",
+    headers: {
+      authorization: myToken,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: formEditProfile.name.value,
+      about: formEditProfile.description.value,
+    }),
+  })
+    .then((data) => data.json())
+    .then((data) => {
+      window.location.reload();
+    })
+}
+
+confirmDeleteForm.addEventListener('submit',onConfirmDelete);
+
+
 function viewImage(event) {
   openPopup(popupTypeImage);
 
@@ -60,14 +99,26 @@ function viewImage(event) {
   popupCaption.textContent = event.target.alt;
 }
 
-placesList.append(
-  ...initialCards.map((descr) => addCard(descr, delCard, likeCard, viewImage))
-);
-
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
-  profileTitle.textContent = formEditProfile.name.value;
-  profileDescription.textContent = formEditProfile.description.value;
+
+  fetch(`https://nomoreparties.co/v1/${myCohort}/users/me`, {
+    method: "PATCH",
+    headers: {
+      authorization: myToken,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: formEditProfile.name.value,
+      about: formEditProfile.description.value,
+    }),
+  })
+    .then((data) => data.json())
+    .then((data) => {
+      profileTitle.textContent = data.name;
+      profileDescription.textContent = data.about;
+    });
+
   closePopup(popupTypeEdit);
 }
 
@@ -79,18 +130,31 @@ function handleAddCard(evt) {
   formAddCard["place-name"].value = "";
   formAddCard.link.value = "";
   newCardLinkValid();
-  const newCard = addCard(
-    {
-      name: cardTitle,
-      link: cardLink,
-    },
-    delCard,
-    likeCard,
-    viewImage
-  );
 
-  placesList.prepend(newCard);
-  closePopup(popupTypeNewCard);
+  fetch(`https://nomoreparties.co/v1/${myCohort}/cards`, {
+    method: 'POST',
+    headers: {
+      authorization: myToken,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: cardTitle,
+      link: cardLink
+    })})
+    .then((data) => data.json())
+    .then((data) => {
+      const newCard = addCard(
+        data,
+        delCard,
+        likeCard,
+        viewImage,
+        profileInfo
+      );
+    
+      placesList.prepend(newCard);
+      closePopup(popupTypeNewCard);    
+    })
+
 }
 
 formEditProfile.addEventListener("submit", handleProfileFormSubmit);
@@ -178,7 +242,6 @@ function profileEditFieldValid(field, fieldError, btn, maxLegth) {
   }
 }
 
-
 function profileEditNameValid() {
   profileEditFieldValid(
     popupEditProfileFieldName,
@@ -198,7 +261,12 @@ function profileEditDescriptionValid() {
 }
 
 function newCardNameValid() {
-  profileEditFieldValid(popupNewCardFieldName, popupNewCardFieldNameError, formNewCardSubmitButton, 20);
+  profileEditFieldValid(
+    popupNewCardFieldName,
+    popupNewCardFieldNameError,
+    formNewCardSubmitButton,
+    20
+  );
 }
 
 function newCardLinkValid() {
@@ -222,3 +290,53 @@ popupEditProfileFieldDescription.addEventListener(
 );
 popupNewCardFieldName.addEventListener("input", newCardNameValid);
 popupNewCardFieldLink.addEventListener("input", newCardLinkValid);
+
+/*
+fetch('https://nomoreparties.co/v1/wff-cohort-12/cards', {
+  headers: {
+    authorization: '90ad5c9a-5357-4276-be02-5ea1b5321bf2'
+  }
+})
+  .then(res => res.json())
+  .then((result) => {
+    console.log(result);
+  }); */
+
+const promiseGetProfile = fetch(
+  "https://nomoreparties.co/v1/wff-cohort-12/users/me",
+  {
+    headers: {
+      authorization: "90ad5c9a-5357-4276-be02-5ea1b5321bf2",
+    },
+  }
+)
+  .then((res) => res.json())
+  .then((result) => {
+    profileInfo = result;
+    profileTitle.textContent = result.name;
+    profileDescription.textContent = result.about;
+    profileImage.style.backgroundImage = `url('${result.avatar}')`;
+  });
+
+const promiseGetCards = fetch(`https://nomoreparties.co/v1/${myCohort}/cards`, {
+  headers: {
+    authorization: myToken,
+  },
+})
+  .then((res) => res.json())
+  .then((result) => {
+    cardsList = result;
+  });
+
+const promiseGetProfileAndCards = Promise.all([
+  promiseGetProfile,
+  promiseGetCards,
+]);
+
+promiseGetProfileAndCards.then(() => {
+  placesList.append(
+    ...cardsList.map((descr) =>
+      addCard(descr, delCard, likeCard, viewImage, profileInfo)
+    )
+  );
+});

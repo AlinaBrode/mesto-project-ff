@@ -105,6 +105,18 @@
           <p class="popup__caption"></p>
         </div>
       </div>
+      <div class="popup popup_type_delete-confirm popup_is-animated">
+        <div class="popup__content">
+          <button type="button" class="popup__close"></button>
+          <h3 class="popup__title">Вы уверены?</h3>
+          <form class="popup__form" name="delete-confirm">
+            <button type="submit" class="button popup__button">
+              Да
+            </button>
+          </form>
+          <p class="popup__caption"></p>
+        </div>
+      </div>
     </div>
     <!-- <script src="./scripts/cards.js"></script>
 <script src="./scripts/index.js" defer></script> -->
@@ -115,7 +127,10 @@
         <button type="button" class="card__delete-button"></button>
         <div class="card__description">
           <h2 class="card__title"></h2>
-          <button type="button" class="card__like-button"></button>
+          <div class="like__group">
+            <button type="button" class="card__like-button"></button>
+            <span class="like-count">0</span>
+          </div>
         </div>
       </li>
     </template>
