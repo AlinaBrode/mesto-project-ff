@@ -1,7 +1,7 @@
 import "./pages/index.css";
 
 import { initialCards } from "./cards.js";
-import { addCard, likeCard} from "./card.js";
+import { addCard } from "./card.js";
 import {
   openPopup,
   closePopup,
@@ -340,3 +340,45 @@ promiseGetProfileAndCards.then(() => {
     )
   );
 });
+
+
+function likeCard(event) {
+  console.log('likeCardid',event.target.cardId);
+
+  if (event.target.classList.contains("card__like-button_is-active")) {
+
+    fetch(`https://nomoreparties.co/v1/${myCohort}/cards/likes/${event.target.cardId}`, {
+      method: "DELETE",
+      headers: {
+        authorization: myToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: formEditProfile.name.value,
+        about: formEditProfile.description.value,
+      }),
+    })
+      .then((data) => data.json())
+      .then((data) => {
+        window.location.reload();
+        // event.target.classList.add("card__like-button_is-active");
+      })
+    } else {
+      fetch(`https://nomoreparties.co/v1/${myCohort}/cards/likes/${event.target.cardId}`, {
+      method: "PUT",
+      headers: {
+        authorization: myToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: formEditProfile.name.value,
+        about: formEditProfile.description.value,
+      }),
+    })
+      .then((data) => data.json())
+      .then((data) => {
+        window.location.reload();
+        // event.target.classList.remove("card__like-button_is-active");
+      })
+    }
+}

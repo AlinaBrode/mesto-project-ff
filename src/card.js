@@ -5,6 +5,16 @@ export function addCard(
   viewImage,
   profileInfo
 ) {
+  console.log('item',item);
+
+  let weLikeIt = false;
+  for (const likeItem of item.likes) {
+    if (profileInfo._id == likeItem._id) {
+      weLikeIt = true;
+      break;
+    }
+  }
+
   const template = document.querySelector("#card-template").content;
   const htmlItem = template.querySelector(".places__item").cloneNode(true);
   htmlItem.querySelector(".card__title").textContent = item.name;
@@ -21,6 +31,11 @@ export function addCard(
 
   const likeButton = htmlItem.querySelector(".card__like-button");
   likeButton.addEventListener("click", funcLikeCard);
+  likeButton.cardId = item._id;
+  if (weLikeIt) {
+    likeButton.classList.add('card__like-button_is-active');
+  }
+
   const isCardOwner = item.owner._id === profileInfo._id;
   if (!isCardOwner) {
     delButton.remove();
@@ -37,6 +52,3 @@ export function addCard(
   return htmlItem;
 }
 
-export function likeCard(event) {
-  event.target.classList.toggle("card__like-button_is-active");
-}
