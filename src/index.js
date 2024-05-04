@@ -23,7 +23,9 @@ const profileTitle = document.querySelector(".profile__title");
 const profileImage = document.querySelector(".profile__image");
 const profileDescription = document.querySelector(".profile__description");
 const formEditProfile = document.forms["edit-profile"];
+const buttonEditProfile = formEditProfile.querySelector(".submit__button");
 const formAddCard = document.forms["new-place"];
+const buttonNewPlace = formAddCard.querySelector(".submit__button");
 const formNewAvatar = document.forms["new-avatar"];
 const buttonNewAvatar = document.querySelector(".submit__button");
 const popupImage = document.querySelector(".popup__image");
@@ -107,7 +109,8 @@ function viewImage(event) {
 
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
-
+  buttonEditProfile.textContent = "Сохрюнение...";
+  console.log('profile form submit', buttonEditProfile);
   fetch(`https://nomoreparties.co/v1/${myCohort}/users/me`, {
     method: "PATCH",
     headers: {
@@ -123,7 +126,11 @@ function handleProfileFormSubmit(evt) {
     .then((data) => {
       profileTitle.textContent = data.name;
       profileDescription.textContent = data.about;
-    });
+    })
+    .finally(()=>{
+      buttonEditProfile.textContent = "сОХРЯНЕНИЕ...";
+    })
+    ;
 
   closePopup(popupTypeEdit);
 }
@@ -136,7 +143,7 @@ function handleAddCard(evt) {
   formAddCard["place-name"].value = "";
   formAddCard.link.value = "";
   newCardLinkValid();
-
+  buttonNewPlace.textContent='Сохрагниение...';
   fetch(`https://nomoreparties.co/v1/${myCohort}/cards`, {
     method: "POST",
     headers: {
@@ -154,6 +161,9 @@ function handleAddCard(evt) {
 
       placesList.prepend(newCard);
       closePopup(popupTypeNewCard);
+    })
+    .finally(()=>{
+      buttonNewPlace.textContent = "сОХРЯНЕНИЕ...";
     });
 }
 
@@ -392,7 +402,7 @@ profileImage.addEventListener("click", (evt) => {
 formNewAvatar.addEventListener("submit", (evt) => {
   evt.preventDefault();
   closePopup(popupTypeNewAvatar);
-  console.log("new avatar link", formNewAvatar.link.value);
+  buttonNewAvatar.textContent = "Сохрюнение...";
   fetch(`https://nomoreparties.co/v1/${myCohort}/users/me/avatar`, {
     method: "PATCH",
     headers: {
@@ -406,5 +416,9 @@ formNewAvatar.addEventListener("submit", (evt) => {
     .then((data) => data.json())
     .then((data) => {
       window.location.reload();
-    });
+    })
+    .finally(()=>{
+      buttonNewAvatar.textContent = "сОХРЯНЕНИЕ...";
+    })
+    ;
 });
