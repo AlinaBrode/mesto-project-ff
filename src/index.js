@@ -14,19 +14,25 @@ const profileAddButton = document.querySelector(".profile__add-button");
 const profileEditButton = document.querySelector(".profile__edit-button");
 const popupTypeEdit = document.querySelector(".popup_type_edit");
 const popupTypeNewCard = document.querySelector(".popup_type_new-card");
+const popupTypeNewAvatar = document.querySelector(".popup_type_new-avatar");
 const popupTypeImage = document.querySelector(".popup_type_image");
-const popupTypeDelConfirm = document.querySelector(".popup_type_delete-confirm");
+const popupTypeDelConfirm = document.querySelector(
+  ".popup_type_delete-confirm"
+);
 const profileTitle = document.querySelector(".profile__title");
 const profileImage = document.querySelector(".profile__image");
 const profileDescription = document.querySelector(".profile__description");
 const formEditProfile = document.forms["edit-profile"];
 const formAddCard = document.forms["new-place"];
+const formNewAvatar = document.forms["new-avatar"];
+const buttonNewAvatar = document.querySelector(".submit__button");
 const popupImage = document.querySelector(".popup__image");
 const popupCaption = document.querySelector(".popup__caption");
 const placesList = document.querySelector(".places__list");
-const popupConfirmDelete = document.querySelector('.popup_type_delete-confirm');
+const popupConfirmDelete = document.querySelector(".popup_type_delete-confirm");
 const confirmDeleteForm = popupConfirmDelete.querySelector(".popup__form");
-const popupConfirmDeleteButton = confirmDeleteForm.querySelector('.popup__button');
+const popupConfirmDeleteButton =
+  confirmDeleteForm.querySelector(".popup__button");
 
 let profileInfo = null;
 let cardsList = null;
@@ -62,8 +68,6 @@ const popupNewCardFieldLinkError = formAddCard.querySelector(
 );
 
 function delCard(event) {
-  /*event.target.closest(".places__item").remove();
-  console.log('cardId',event.target.cardId);*/
   popupConfirmDeleteButton.cardId = event.target.cardId;
   openPopup(popupTypeDelConfirm);
 }
@@ -71,25 +75,27 @@ function delCard(event) {
 function onConfirmDelete(event) {
   event.preventDefault();
 
-  fetch(`https://nomoreparties.co/v1/${myCohort}/cards/${popupConfirmDeleteButton.cardId}`, {
-    method: "DELETE",
-    headers: {
-      authorization: myToken,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: formEditProfile.name.value,
-      about: formEditProfile.description.value,
-    }),
-  })
+  fetch(
+    `https://nomoreparties.co/v1/${myCohort}/cards/${popupConfirmDeleteButton.cardId}`,
+    {
+      method: "DELETE",
+      headers: {
+        authorization: myToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: formEditProfile.name.value,
+        about: formEditProfile.description.value,
+      }),
+    }
+  )
     .then((data) => data.json())
     .then((data) => {
       window.location.reload();
-    })
+    });
 }
 
-confirmDeleteForm.addEventListener('submit',onConfirmDelete);
-
+confirmDeleteForm.addEventListener("submit", onConfirmDelete);
 
 function viewImage(event) {
   openPopup(popupTypeImage);
@@ -132,29 +138,23 @@ function handleAddCard(evt) {
   newCardLinkValid();
 
   fetch(`https://nomoreparties.co/v1/${myCohort}/cards`, {
-    method: 'POST',
+    method: "POST",
     headers: {
       authorization: myToken,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       name: cardTitle,
-      link: cardLink
-    })})
+      link: cardLink,
+    }),
+  })
     .then((data) => data.json())
     .then((data) => {
-      const newCard = addCard(
-        data,
-        delCard,
-        likeCard,
-        viewImage,
-        profileInfo
-      );
-    
-      placesList.prepend(newCard);
-      closePopup(popupTypeNewCard);    
-    })
+      const newCard = addCard(data, delCard, likeCard, viewImage, profileInfo);
 
+      placesList.prepend(newCard);
+      closePopup(popupTypeNewCard);
+    });
 }
 
 formEditProfile.addEventListener("submit", handleProfileFormSubmit);
@@ -341,44 +341,70 @@ promiseGetProfileAndCards.then(() => {
   );
 });
 
-
 function likeCard(event) {
-  console.log('likeCardid',event.target.cardId);
-
   if (event.target.classList.contains("card__like-button_is-active")) {
-
-    fetch(`https://nomoreparties.co/v1/${myCohort}/cards/likes/${event.target.cardId}`, {
-      method: "DELETE",
-      headers: {
-        authorization: myToken,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: formEditProfile.name.value,
-        about: formEditProfile.description.value,
-      }),
-    })
+    fetch(
+      `https://nomoreparties.co/v1/${myCohort}/cards/likes/${event.target.cardId}`,
+      {
+        method: "DELETE",
+        headers: {
+          authorization: myToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formEditProfile.name.value,
+          about: formEditProfile.description.value,
+        }),
+      }
+    )
       .then((data) => data.json())
       .then((data) => {
         window.location.reload();
         // event.target.classList.add("card__like-button_is-active");
-      })
-    } else {
-      fetch(`https://nomoreparties.co/v1/${myCohort}/cards/likes/${event.target.cardId}`, {
-      method: "PUT",
-      headers: {
-        authorization: myToken,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: formEditProfile.name.value,
-        about: formEditProfile.description.value,
-      }),
-    })
+      });
+  } else {
+    fetch(
+      `https://nomoreparties.co/v1/${myCohort}/cards/likes/${event.target.cardId}`,
+      {
+        method: "PUT",
+        headers: {
+          authorization: myToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formEditProfile.name.value,
+          about: formEditProfile.description.value,
+        }),
+      }
+    )
       .then((data) => data.json())
       .then((data) => {
         window.location.reload();
         // event.target.classList.remove("card__like-button_is-active");
-      })
-    }
+      });
+  }
 }
+
+profileImage.addEventListener("click", (evt) => {
+  openPopup(popupTypeNewAvatar);
+});
+
+formNewAvatar.addEventListener("submit", (evt) => {
+  evt.preventDefault();
+  closePopup(popupTypeNewAvatar);
+  console.log("new avatar link", formNewAvatar.link.value);
+  fetch(`https://nomoreparties.co/v1/${myCohort}/users/me/avatar`, {
+    method: "PATCH",
+    headers: {
+      authorization: myToken,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      avatar: formNewAvatar.link.value,
+    }),
+  })
+    .then((data) => data.json())
+    .then((data) => {
+      window.location.reload();
+    });
+});

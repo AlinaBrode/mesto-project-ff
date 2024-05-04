@@ -1,12 +1,30 @@
 .profile__image {
+  position: relative;
   width: 120px;
   height: 120px;
-  -webkit-border-radius: 50%;
-  -moz-border-radius: 50%;
   border-radius: 50%;
   background-size: cover;
   background-position: center;
   margin: 0 29px 0 0;
+  overflow: hidden; /* Ensures nothing spills outside the border-radius */
+}
+
+.profile__image::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8) url('../../../images/edit-icon.svg') no-repeat center center;
+  background-size: 26px 26px; /* Set the size of the pencil icon */
+  opacity: 0; /* The overlay is initially invisible */
+  transition: opacity 0.3s ease;
+  border-radius: 50%; /* Ensure the rounded corners match the image */
+}
+
+.profile__image:hover::after {
+  opacity: 1; /* Make the overlay visible on hover */
 }
 
 @media screen and (max-width: 740px) {

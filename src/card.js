@@ -5,7 +5,6 @@ export function addCard(
   viewImage,
   profileInfo
 ) {
-  console.log('item',item);
 
   let weLikeIt = false;
   for (const likeItem of item.likes) {
