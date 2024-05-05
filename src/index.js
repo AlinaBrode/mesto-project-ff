@@ -1,6 +1,6 @@
 import "./pages/index.css";
 
-import { deleteCard } from "./api.js";
+import { deleteCard, submitProfileForm, remoteCreateCard } from "./api.js";
 import { createCard } from "./card.js";
 
 import {
@@ -76,17 +76,23 @@ function delCard(event) {
   openPopup(popupTypeDelConfirm);
 }
 
+function logError(err) {
+  console.log(err); // выводим ошибку в консоль
+}
+
 function onConfirmDelete(event) {
   event.preventDefault();
 
   deleteCard(
     popupConfirmDeleteButton.cardId,
     formEditProfile.name.value,
-    formEditProfile.description.value,
-  ).then((data) => {
-    document.querySelector(`#a${popupConfirmDeleteButton.cardId}`).remove();  //cardId can have a digit at the beginning, that is not correct js id, so 'a' at the beginning
-    closePopup(popupTypeDelConfirm);
-  });
+    formEditProfile.description.value
+  )
+    .then((data) => {
+      document.querySelector(`#a${popupConfirmDeleteButton.cardId}`).remove(); //cardId can have a digit at the beginning, that is not correct js id, so 'a' at the beginning
+      closePopup(popupTypeDelConfirm);
+    })
+    .catch(logError);
 }
 
 confirmDeleteForm.addEventListener("submit", onConfirmDelete);
@@ -102,28 +108,19 @@ function viewImage(event) {
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
   buttonEditProfile.textContent = "Сохранение...";
-  console.log("profile form submit", buttonEditProfile);
-  fetch(`https://nomoreparties.co/v1/${myCohort}/users/me`, {
-    method: "PATCH",
-    headers: {
-      authorization: myToken,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: formEditProfile.name.value,
-      about: formEditProfile.description.value,
-    }),
-  })
-    .then((data) => data.json())
+  submitProfileForm(
+    formEditProfile.name.value,
+    formEditProfile.description.value
+  )
     .then((data) => {
       profileTitle.textContent = data.name;
       profileDescription.textContent = data.about;
     })
+    .catch(logError)
     .finally(() => {
       buttonEditProfile.textContent = "Сохранение...";
+      closePopup(popupTypeEdit);
     });
-
-  closePopup(popupTypeEdit);
 }
 
 function handleAddCard(evt) {
@@ -134,19 +131,8 @@ function handleAddCard(evt) {
   formAddCard["place-name"].value = "";
   formAddCard.link.value = "";
   newCardLinkValid();
-  buttonNewPlace.textContent = "Сохрагниение...";
-  fetch(`https://nomoreparties.co/v1/${myCohort}/cards`, {
-    method: "POST",
-    headers: {
-      authorization: myToken,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: cardTitle,
-      link: cardLink,
-    }),
-  })
-    .then((data) => data.json())
+  buttonNewPlace.textContent = "Сохранение...";
+  remoteCreateCard(cardTitle, cardLink)
     .then((data) => {
       const newCard = createCard(
         data,
@@ -297,17 +283,6 @@ popupEditProfileFieldDescription.addEventListener(
 );
 popupNewCardFieldName.addEventListener("input", newCardNameValid);
 popupNewCardFieldLink.addEventListener("input", newCardLinkValid);
-
-/*
-fetch('https://nomoreparties.co/v1/wff-cohort-12/cards', {
-  headers: {
-    authorization: '90ad5c9a-5357-4276-be02-5ea1b5321bf2'
-  }
-})
-  .then(res => res.json())
-  .then((result) => {
-    console.log(result);
-  }); */
 
 const promiseGetProfile = fetch(
   "https://nomoreparties.co/v1/wff-cohort-12/users/me",
