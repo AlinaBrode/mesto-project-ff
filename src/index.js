@@ -3,12 +3,14 @@ import "./pages/index.css";
 import { deleteCard } from "./api.js";
 import { initialCards } from "./cards.js";
 import { createCard } from "./card.js";
+
 import {
   openPopup,
   closePopup,
   onClosePopupEsc,
   onOverlayClose,
 } from "./modal.js";
+
 const myToken = "90ad5c9a-5357-4276-be02-5ea1b5321bf2";
 const myCohort = "wff-cohort-12";
 const profileAddButton = document.querySelector(".profile__add-button");
@@ -79,11 +81,9 @@ function onConfirmDelete(event) {
   event.preventDefault();
 
   deleteCard(
-    myCohort,
     popupConfirmDeleteButton.cardId,
     formEditProfile.name.value,
     formEditProfile.description.value,
-    myToken
   ).then((data) => {
     window.location.reload();
   });
