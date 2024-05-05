@@ -57,3 +57,17 @@ export function getProfileAndCards() {
 
   return Promise.all([promiseGetProfile, promiseGetCards]);
 }
+
+export function removeLike(cardId) {
+  return fetch(config.baseUrl+`/cards/likes/${cardId}`, {
+    method: "DELETE",
+    headers: config.headers
+  }).then(handleResponse);
+}
+
+export function setLike(cardId) {
+  return fetch(config.baseUrl+`/cards/likes/${cardId}`, {
+    method: "PUT",
+    headers: config.headers
+  }).then(handleResponse);
+}

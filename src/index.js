@@ -5,6 +5,8 @@ import {
   submitProfileForm,
   remoteCreateCard,
   getProfileAndCards,
+  setLike,
+  removeLike
 } from "./api.js";
 import { createCard } from "./card.js";
 
@@ -305,45 +307,19 @@ getProfileAndCards().then((profileCards) => {
 });
 
 function likeCard(event) {
+  const cardId = event.target.cardId;
+
   if (event.target.classList.contains("card__like-button_is-active")) {
-    fetch(
-      `https://nomoreparties.co/v1/${myCohort}/cards/likes/${event.target.cardId}`,
-      {
-        method: "DELETE",
-        headers: {
-          authorization: myToken,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formEditProfile.name.value,
-          about: formEditProfile.description.value,
-        }),
-      }
-    )
-      .then((data) => data.json())
+    removeLike(cardId)
       .then((data) => {
-        window.location.reload();
-        // event.target.classList.add("card__like-button_is-active");
+        event.target.classList.remove("card__like-button_is-active");
+        event.target.nextElementSibling.textContent = data.likes.length;
       });
   } else {
-    fetch(
-      `https://nomoreparties.co/v1/${myCohort}/cards/likes/${event.target.cardId}`,
-      {
-        method: "PUT",
-        headers: {
-          authorization: myToken,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formEditProfile.name.value,
-          about: formEditProfile.description.value,
-        }),
-      }
-    )
-      .then((data) => data.json())
+    setLike(cardId)
       .then((data) => {
-        window.location.reload();
-        // event.target.classList.remove("card__like-button_is-active");
+        event.target.classList.add("card__like-button_is-active");
+        event.target.nextElementSibling.textContent = data.likes.length;
       });
   }
 }
