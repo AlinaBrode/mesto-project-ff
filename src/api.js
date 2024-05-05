@@ -38,10 +38,22 @@ export function submitProfileForm(name, description) {
 export function remoteCreateCard(cardTitle, cardLink) {
   return fetch(config.baseUrl + "/cards", {
     method: "POST",
-    headers:config.headers,
+    headers: config.headers,
     body: JSON.stringify({
       name: cardTitle,
       link: cardLink,
     }),
   }).then(handleResponse);
+}
+
+export function getProfileAndCards() {
+  const promiseGetProfile = fetch(config.baseUrl + "/users/me", {
+    headers: config.headers,
+  }).then(handleResponse);
+
+  const promiseGetCards = fetch(config.baseUrl + "/cards", {
+    headers: config.headers,
+  }).then(handleResponse);
+
+  return Promise.all([promiseGetProfile, promiseGetCards]);
 }

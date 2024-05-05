@@ -1,6 +1,11 @@
 import "./pages/index.css";
 
-import { deleteCard, submitProfileForm, remoteCreateCard } from "./api.js";
+import {
+  deleteCard,
+  submitProfileForm,
+  remoteCreateCard,
+  getProfileAndCards,
+} from "./api.js";
 import { createCard } from "./card.js";
 
 import {
@@ -284,41 +289,17 @@ popupEditProfileFieldDescription.addEventListener(
 popupNewCardFieldName.addEventListener("input", newCardNameValid);
 popupNewCardFieldLink.addEventListener("input", newCardLinkValid);
 
-const promiseGetProfile = fetch(
-  "https://nomoreparties.co/v1/wff-cohort-12/users/me",
-  {
-    headers: {
-      authorization: "90ad5c9a-5357-4276-be02-5ea1b5321bf2",
-    },
-  }
-)
-  .then((res) => res.json())
-  .then((result) => {
-    profileInfo = result;
-    profileTitle.textContent = result.name;
-    profileDescription.textContent = result.about;
-    profileImage.style.backgroundImage = `url('${result.avatar}')`;
-  });
+getProfileAndCards().then((profileCards) => {
+  const [infoProfile, infoCards] = profileCards;
 
-const promiseGetCards = fetch(`https://nomoreparties.co/v1/${myCohort}/cards`, {
-  headers: {
-    authorization: myToken,
-  },
-})
-  .then((res) => res.json())
-  .then((result) => {
-    cardsList = result;
-  });
+  profileInfo = infoProfile;
+  profileTitle.textContent = infoProfile.name;
+  profileDescription.textContent = infoProfile.about;
+  profileImage.style.backgroundImage = `url('${infoProfile.avatar}')`;
 
-const promiseGetProfileAndCards = Promise.all([
-  promiseGetProfile,
-  promiseGetCards,
-]);
-
-promiseGetProfileAndCards.then(() => {
   placesList.append(
-    ...cardsList.map((descr) =>
-      createCard(descr, delCard, likeCard, viewImage, profileInfo)
+    ...infoCards.map((descr) =>
+      createCard(descr, delCard, likeCard, viewImage, infoProfile)
     )
   );
 });
