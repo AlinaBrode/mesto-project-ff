@@ -1,7 +1,8 @@
 import "./pages/index.css";
 
+import { deleteCard } from "./api.js";
 import { initialCards } from "./cards.js";
-import { addCard } from "./card.js";
+import { createCard } from "./card.js";
 import {
   openPopup,
   closePopup,
@@ -77,24 +78,15 @@ function delCard(event) {
 function onConfirmDelete(event) {
   event.preventDefault();
 
-  fetch(
-    `https://nomoreparties.co/v1/${myCohort}/cards/${popupConfirmDeleteButton.cardId}`,
-    {
-      method: "DELETE",
-      headers: {
-        authorization: myToken,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: formEditProfile.name.value,
-        about: formEditProfile.description.value,
-      }),
-    }
-  )
-    .then((data) => data.json())
-    .then((data) => {
-      window.location.reload();
-    });
+  deleteCard(
+    myCohort,
+    popupConfirmDeleteButton.cardId,
+    formEditProfile.name.value,
+    formEditProfile.description.value,
+    myToken
+  ).then((data) => {
+    window.location.reload();
+  });
 }
 
 confirmDeleteForm.addEventListener("submit", onConfirmDelete);
@@ -109,8 +101,8 @@ function viewImage(event) {
 
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
-  buttonEditProfile.textContent = "Сохрюнение...";
-  console.log('profile form submit', buttonEditProfile);
+  buttonEditProfile.textContent = "Сохранение...";
+  console.log("profile form submit", buttonEditProfile);
   fetch(`https://nomoreparties.co/v1/${myCohort}/users/me`, {
     method: "PATCH",
     headers: {
@@ -127,10 +119,9 @@ function handleProfileFormSubmit(evt) {
       profileTitle.textContent = data.name;
       profileDescription.textContent = data.about;
     })
-    .finally(()=>{
-      buttonEditProfile.textContent = "сОХРЯНЕНИЕ...";
-    })
-    ;
+    .finally(() => {
+      buttonEditProfile.textContent = "Сохранение...";
+    });
 
   closePopup(popupTypeEdit);
 }
@@ -143,7 +134,7 @@ function handleAddCard(evt) {
   formAddCard["place-name"].value = "";
   formAddCard.link.value = "";
   newCardLinkValid();
-  buttonNewPlace.textContent='Сохрагниение...';
+  buttonNewPlace.textContent = "Сохрагниение...";
   fetch(`https://nomoreparties.co/v1/${myCohort}/cards`, {
     method: "POST",
     headers: {
@@ -157,13 +148,19 @@ function handleAddCard(evt) {
   })
     .then((data) => data.json())
     .then((data) => {
-      const newCard = addCard(data, delCard, likeCard, viewImage, profileInfo);
+      const newCard = createCard(
+        data,
+        delCard,
+        likeCard,
+        viewImage,
+        profileInfo
+      );
 
       placesList.prepend(newCard);
       closePopup(popupTypeNewCard);
     })
-    .finally(()=>{
-      buttonNewPlace.textContent = "сОХРЯНЕНИЕ...";
+    .finally(() => {
+      buttonNewPlace.textContent = "Сохранить...";
     });
 }
 
@@ -346,7 +343,7 @@ const promiseGetProfileAndCards = Promise.all([
 promiseGetProfileAndCards.then(() => {
   placesList.append(
     ...cardsList.map((descr) =>
-      addCard(descr, delCard, likeCard, viewImage, profileInfo)
+      createCard(descr, delCard, likeCard, viewImage, profileInfo)
     )
   );
 });
@@ -402,7 +399,7 @@ profileImage.addEventListener("click", (evt) => {
 formNewAvatar.addEventListener("submit", (evt) => {
   evt.preventDefault();
   closePopup(popupTypeNewAvatar);
-  buttonNewAvatar.textContent = "Сохрюнение...";
+  buttonNewAvatar.textContent = "Сохранение...";
   fetch(`https://nomoreparties.co/v1/${myCohort}/users/me/avatar`, {
     method: "PATCH",
     headers: {
@@ -417,8 +414,7 @@ formNewAvatar.addEventListener("submit", (evt) => {
     .then((data) => {
       window.location.reload();
     })
-    .finally(()=>{
-      buttonNewAvatar.textContent = "сОХРЯНЕНИЕ...";
-    })
-    ;
+    .finally(() => {
+      buttonNewAvatar.textContent = "Сохранить...";
+    });
 });

@@ -1,4 +1,4 @@
-export function addCard(
+export function createCard(
   item,
   funcDelCard,
   funcLikeCard,
@@ -6,13 +6,7 @@ export function addCard(
   profileInfo
 ) {
 
-  let weLikeIt = false;
-  for (const likeItem of item.likes) {
-    if (profileInfo._id == likeItem._id) {
-      weLikeIt = true;
-      break;
-    }
-  }
+  const weLikeIt = item.likes.some(likeItem => profileInfo._id == likeItem._id);
 
   const template = document.querySelector("#card-template").content;
   const htmlItem = template.querySelector(".places__item").cloneNode(true);
@@ -42,10 +36,8 @@ export function addCard(
     delButton.cardId = item._id;
   }
 
-  likeButton.disabled = isCardOwner;
-
   const likeCount = htmlItem.querySelector(".like-count");
-  likeCount.textContent = item.likes.length.toString();
+  likeCount.textContent = item.likes.length;
  
 
   return htmlItem;
