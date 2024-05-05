@@ -1,7 +1,6 @@
 import "./pages/index.css";
 
 import { deleteCard } from "./api.js";
-import { initialCards } from "./cards.js";
 import { createCard } from "./card.js";
 
 import {
@@ -85,7 +84,8 @@ function onConfirmDelete(event) {
     formEditProfile.name.value,
     formEditProfile.description.value,
   ).then((data) => {
-    window.location.reload();
+    document.querySelector(`#a${popupConfirmDeleteButton.cardId}`).remove();  //cardId can have a digit at the beginning, that is not correct js id, so 'a' at the beginning
+    closePopup(popupTypeDelConfirm);
   });
 }
 

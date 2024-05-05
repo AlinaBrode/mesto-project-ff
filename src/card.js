@@ -11,6 +11,7 @@ export function createCard(
   const template = document.querySelector("#card-template").content;
   const htmlItem = template.querySelector(".places__item").cloneNode(true);
   htmlItem.querySelector(".card__title").textContent = item.name;
+  htmlItem.setAttribute('id', 'a' + item._id);
 
   const cardImage = htmlItem.querySelector(".card__image");
   cardImage.src = item.link;
