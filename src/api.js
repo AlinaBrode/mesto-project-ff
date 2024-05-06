@@ -59,15 +59,25 @@ export function getProfileAndCards() {
 }
 
 export function removeLike(cardId) {
-  return fetch(config.baseUrl+`/cards/likes/${cardId}`, {
+  return fetch(config.baseUrl + `/cards/likes/${cardId}`, {
     method: "DELETE",
-    headers: config.headers
+    headers: config.headers,
   }).then(handleResponse);
 }
 
 export function setLike(cardId) {
-  return fetch(config.baseUrl+`/cards/likes/${cardId}`, {
+  return fetch(config.baseUrl + `/cards/likes/${cardId}`, {
     method: "PUT",
-    headers: config.headers
+    headers: config.headers,
+  }).then(handleResponse);
+}
+
+export function patchAvatar(avatarLink) {
+  return fetch(config.baseUrl + "/users/me/avatar", {
+    method: "PATCH",
+    headers: config.headers,
+    body: JSON.stringify({
+      avatar: avatarLink,
+    }),
   }).then(handleResponse);
 }

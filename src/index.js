@@ -6,7 +6,8 @@ import {
   remoteCreateCard,
   getProfileAndCards,
   setLike,
-  removeLike
+  removeLike,
+  patchAvatar,
 } from "./api.js";
 import { createCard } from "./card.js";
 
@@ -152,6 +153,7 @@ function handleAddCard(evt) {
       placesList.prepend(newCard);
       closePopup(popupTypeNewCard);
     })
+    .catch(logError)
     .finally(() => {
       buttonNewPlace.textContent = "Сохранить...";
     });
@@ -291,20 +293,22 @@ popupEditProfileFieldDescription.addEventListener(
 popupNewCardFieldName.addEventListener("input", newCardNameValid);
 popupNewCardFieldLink.addEventListener("input", newCardLinkValid);
 
-getProfileAndCards().then((profileCards) => {
-  const [infoProfile, infoCards] = profileCards;
+getProfileAndCards()
+  .then((profileCards) => {
+    const [infoProfile, infoCards] = profileCards;
 
-  profileInfo = infoProfile;
-  profileTitle.textContent = infoProfile.name;
-  profileDescription.textContent = infoProfile.about;
-  profileImage.style.backgroundImage = `url('${infoProfile.avatar}')`;
+    profileInfo = infoProfile;
+    profileTitle.textContent = infoProfile.name;
+    profileDescription.textContent = infoProfile.about;
+    profileImage.style.backgroundImage = `url('${infoProfile.avatar}')`;
 
-  placesList.append(
-    ...infoCards.map((descr) =>
-      createCard(descr, delCard, likeCard, viewImage, infoProfile)
-    )
-  );
-});
+    placesList.append(
+      ...infoCards.map((descr) =>
+        createCard(descr, delCard, likeCard, viewImage, infoProfile)
+      )
+    );
+  })
+  .catch(logError);
 
 function likeCard(event) {
   const cardId = event.target.cardId;
@@ -314,13 +318,15 @@ function likeCard(event) {
       .then((data) => {
         event.target.classList.remove("card__like-button_is-active");
         event.target.nextElementSibling.textContent = data.likes.length;
-      });
+      })
+      .catch(logError);
   } else {
     setLike(cardId)
       .then((data) => {
         event.target.classList.add("card__like-button_is-active");
         event.target.nextElementSibling.textContent = data.likes.length;
-      });
+      })
+      .catch(logError);
   }
 }
 
@@ -332,20 +338,12 @@ formNewAvatar.addEventListener("submit", (evt) => {
   evt.preventDefault();
   closePopup(popupTypeNewAvatar);
   buttonNewAvatar.textContent = "Сохранение...";
-  fetch(`https://nomoreparties.co/v1/${myCohort}/users/me/avatar`, {
-    method: "PATCH",
-    headers: {
-      authorization: myToken,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      avatar: formNewAvatar.link.value,
-    }),
-  })
-    .then((data) => data.json())
+
+  patchAvatar(formNewAvatar.link.value)
     .then((data) => {
-      window.location.reload();
+      profileImage.style.backgroundImage = `url('${data.avatar}')`;
     })
+    .catch(logError)
     .finally(() => {
       buttonNewAvatar.textContent = "Сохранить...";
     });
