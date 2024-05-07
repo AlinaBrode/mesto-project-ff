@@ -14,12 +14,8 @@ import { createCard } from "./card.js";
 import {
   openPopup,
   closePopup,
-  onClosePopupEsc,
-  onOverlayClose,
 } from "./modal.js";
-
-const myToken = "90ad5c9a-5357-4276-be02-5ea1b5321bf2";
-const myCohort = "wff-cohort-12";
+import { enableValidation, clearValidation } from "./validation.js";
 const profileAddButton = document.querySelector(".profile__add-button");
 const profileEditButton = document.querySelector(".profile__edit-button");
 const popupTypeEdit = document.querySelector(".popup_type_edit");
@@ -47,7 +43,6 @@ const popupConfirmDeleteButton =
   confirmDeleteForm.querySelector(".popup__button");
 
 let profileInfo = null;
-let cardsList = null;
 
 const popupEditProfileFieldName = formEditProfile.querySelector(
   ".popup__input_type_name"
@@ -79,6 +74,17 @@ const popupNewCardFieldLinkError = formAddCard.querySelector(
   ".popup__input_type_url-error"
 );
 
+const validationConfig = {
+  formSelector: ".popup__form",
+  inputSelector: ".popup__input",
+  submitButtonSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_disabled",
+  inputErrorClass: "popup__input_type_error",
+  errorClass: "popup__error_visible",
+};
+
+enableValidation(validationConfig);
+
 function delCard(event) {
   popupConfirmDeleteButton.cardId = event.target.cardId;
   openPopup(popupTypeDelConfirm);
@@ -106,6 +112,7 @@ function onConfirmDelete(event) {
 confirmDeleteForm.addEventListener("submit", onConfirmDelete);
 
 function viewImage(event) {
+  clearValidation(popupTypeImage, validationConfig);
   openPopup(popupTypeImage);
 
   popupImage.src = event.target.src;
@@ -138,7 +145,7 @@ function handleAddCard(evt) {
   const cardLink = formAddCard.link.value;
   formAddCard["place-name"].value = "";
   formAddCard.link.value = "";
-  newCardLinkValid();
+  // TODO: clearValidation
   buttonNewPlace.textContent = "Сохранение...";
   remoteCreateCard(cardTitle, cardLink)
     .then((data) => {
@@ -165,12 +172,14 @@ formAddCard.addEventListener("submit", handleAddCard);
 function openDialogEditProfile(evt) {
   formEditProfile.name.value = profileTitle.textContent;
   formEditProfile.description.value = profileDescription.textContent;
-  profileEditNameValid();
-
+  clearValidation(popupTypeEdit, validationConfig);
   openPopup(popupTypeEdit);
 }
 
 function openDialogNewCard(evt) {
+  formAddCard['place-name'].value = "";
+  formAddCard.link.value = "";
+  clearValidation(popupTypeNewCard, validationConfig);
   openPopup(popupTypeNewCard);
 }
 
@@ -188,110 +197,6 @@ closeButtons.forEach((button) => {
   button.addEventListener("click", () => closePopup(popup));
 });
 
-function isValidString(input) {
-  const regex = /^[A-Za-zА-Яа-яёЁ\s\-]+$/;
-  return regex.test(input);
-}
-
-function setError(field, fieldError, btn, errorClass, message) {
-  fieldError.textContent = message;
-  field.classList.add(errorClass);
-  btn.disabled = true;
-}
-
-function clearError(fieldError, btn) {
-  fieldError.textContent = "";
-  btn.disabled = false;
-}
-
-function profileEditFieldValid(field, fieldError, btn, maxLegth) {
-  const name = field.value;
-
-  if (name.length == 0) {
-    setError(
-      field,
-      fieldError,
-      btn,
-      "popup__input-error",
-      "Вы пропустили это поле"
-    );
-  } else if (name.length < 2) {
-    setError(
-      field,
-      fieldError,
-      btn,
-      "popup__input-error",
-      "Минимальное количество символов: 2. Длина текста сейчас: 1 символ."
-    );
-  } else if (name.length > maxLegth) {
-    setError(
-      field,
-      fieldError,
-      btn,
-      "popup__input-error",
-      `Максимальное количество символов: ${maxLegth}. Длина текста в буквах сейчас: ${name.length}.`
-    );
-  } else if (!isValidString(name)) {
-    setError(
-      field,
-      fieldError,
-      btn,
-      "popup__input-error",
-      "Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
-    );
-  } else {
-    clearError(fieldError, btn);
-  }
-}
-
-function profileEditNameValid() {
-  profileEditFieldValid(
-    popupEditProfileFieldName,
-    popupEditProfileFieldNameError,
-    formEditProfileSubmitButton,
-    20
-  );
-}
-
-function profileEditDescriptionValid() {
-  profileEditFieldValid(
-    popupEditProfileFieldDescription,
-    popupEditProfileFieldDescriptionError,
-    formEditProfileSubmitButton,
-    200
-  );
-}
-
-function newCardNameValid() {
-  profileEditFieldValid(
-    popupNewCardFieldName,
-    popupNewCardFieldNameError,
-    formNewCardSubmitButton,
-    20
-  );
-}
-
-function newCardLinkValid() {
-  if (popupNewCardFieldLink.validity.typeMismatch) {
-    setError(
-      popupNewCardFieldLink,
-      popupNewCardFieldLinkError,
-      formNewCardSubmitButton,
-      "popup__input-error",
-      `Введите адрес сайта`
-    );
-  } else {
-    clearError(popupNewCardFieldLinkError, formNewCardSubmitButton);
-  }
-}
-
-popupEditProfileFieldName.addEventListener("input", profileEditNameValid);
-popupEditProfileFieldDescription.addEventListener(
-  "input",
-  profileEditDescriptionValid
-);
-popupNewCardFieldName.addEventListener("input", newCardNameValid);
-popupNewCardFieldLink.addEventListener("input", newCardLinkValid);
 
 getProfileAndCards()
   .then((profileCards) => {
@@ -310,27 +215,32 @@ getProfileAndCards()
   })
   .catch(logError);
 
+
 function likeCard(event) {
   const cardId = event.target.cardId;
 
+  let cardAction = null;
+  let classListAction = null;
+
   if (event.target.classList.contains("card__like-button_is-active")) {
-    removeLike(cardId)
-      .then((data) => {
-        event.target.classList.remove("card__like-button_is-active");
-        event.target.nextElementSibling.textContent = data.likes.length;
-      })
-      .catch(logError);
+    cardAction = removeLike;
+    classListAction = () => {event.target.classList.remove("card__like-button_is-active")}
   } else {
-    setLike(cardId)
-      .then((data) => {
-        event.target.classList.add("card__like-button_is-active");
-        event.target.nextElementSibling.textContent = data.likes.length;
-      })
-      .catch(logError);
+    cardAction = setLike;
+    classListAction = () => {event.target.classList.add("card__like-button_is-active");}
   }
+
+  cardAction(cardId)
+  .then((data) => {
+    classListAction();
+    event.target.nextElementSibling.textContent = data.likes.length;
+  })
+  .catch(logError);
 }
 
 profileImage.addEventListener("click", (evt) => {
+  formNewAvatar.link.value = "";
+  clearValidation(popupTypeNewAvatar,validationConfig);
   openPopup(popupTypeNewAvatar);
 });
 

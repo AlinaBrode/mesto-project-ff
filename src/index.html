@@ -44,24 +44,32 @@
         <div class="popup__content">
           <button type="button" class="popup__close"></button>
           <h3 class="popup__title">Редактировать профиль</h3>
-          <form class="popup__form" name="edit-profile">
+          <form class="popup__form" name="edit-profile" novalidate>
             <input
               type="text"
               name="name"
+              id="popup__input_type_name_id"
               class="popup__input popup__input_type_name"
               placeholder="Имя"
+              minlength="2"
+              maxlength="40"
+              pattern="^[A-Za-zА-Яа-яёЁ\s\-]+$"
+              data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
               required
             />
-            <span class="popup__input popup__input_type_name-error"></span>
+            <span class="popup__input__span popup__input_type_name_id-error"></span>
             <input
               type="text"
               name="description"
+              id="popup__input_type_description_id"
               class="popup__input popup__input_type_description"
               placeholder="Занятие"
+              minlength="2"
+              maxlength="200"
               required
             />
             <span
-              class="popup__input popup__input_type_description-error"
+              class="popup__input__span popup__input_type_description_id-error"
             ></span>
             <button type="submit" class="button popup__button submit__button">
               Сохранить
@@ -73,25 +81,29 @@
         <div class="popup__content">
           <button type="button" class="popup__close"></button>
           <h3 class="popup__title">Новое место</h3>
-          <form class="popup__form" name="new-place">
+          <form class="popup__form" name="new-place" novalidate>
             <input
               type="text"
               name="place-name"
+              id="popup__input_type_name_id"
               class="popup__input popup__input_type_card-name"
               placeholder="Название"
               minlength="2"
               maxlength="30"
+              pattern="^[A-Za-zА-Яа-яёЁ\s\-]+$"
+              data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
               required
             />
-            <span class="popup__input popup__input_type_name-error"></span>
+            <span class="popup__input__span popup__input_type_name_id-error"></span>
             <input
               type="url"
               name="link"
+              id="popup__input_type_url_id"
               class="popup__input popup__input_type_url"
               placeholder="Ссылка на картинку"
               required
             />
-            <span class="popup__input popup__input_type_url-error"></span>
+            <span class="popup__input__span popup__input_type_url_id-error"></span>
             <button type="submit" class="button popup__button submit__button">
               Сохранить
             </button>
@@ -122,15 +134,16 @@
       <div class="popup__content">
         <button type="button" class="popup__close"></button>
         <h3 class="popup__title">Обновить аватар</h3>
-        <form class="popup__form" name="new-avatar">
+        <form class="popup__form" name="new-avatar" novalidate>
           <input
             type="url"
             name="link"
+            id="popup__input_type_url_id"
             class="popup__input popup__input_type_url"
             placeholder="https://somewebsite.com/someimage.jpg"
             required
           />
-          <span class="popup__input popup__input_type_url-error"></span>
+          <span class="popup__input__error popup__input_type_url_id-error"></span>
           <button type="submit" class="button popup__button submit__button">
             Сохранить
           </button>
